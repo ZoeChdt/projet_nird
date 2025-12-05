@@ -11,13 +11,26 @@
     
     </header>
     <main>
+        
         <h1>Bienvenue à toi!</h1>
         <h2>Viens découvrir ce que cache ton ordinateurs, téléphones et à peu près tout ce qui est connecté, découvre comme faire pour échapper à ce contôle</h2>
-            <p>Pour cela choisis un mini-jeu :</p>
-            <div class="menu-buttons">
-                <a href="jeu_puzzle.html" class="btn-nird">🧩 Puzzle – Répare le PC</a>
-                <a href="jeu_defense.html" class="btn-nird">🛡️ Défends ton village</a
-            </div>
+        <p>Pour cela choisis un mini-jeu :</p>
+        <div class="menu-buttons">
+            <button class="game-button puzzle" onclick="window.location.href='jeu_puzzle.html'">
+                <div class="btn-content">
+                    <span class="game-icon">🧩</span>
+                    <span class="game-title">Puzzle</span>
+                    <span class="game-description">Répare le PC</span>
+                </div>
+            </button>
+            <button class="game-button defense" onclick="window.location.href='jeu_defense.html'">
+                <div class="btn-content">
+                    <span class="game-icon">🛡️</span>
+                    <span class="game-title">Défense</span>
+                    <span class="game-description">Défends ton village</span>
+                </div>
+            </button>
+        </div>
     </main>
 </body>
 </html>
