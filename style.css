@@ -26,22 +26,39 @@ body {
 
 /* === Titre === */
 h1 {
-    font-size: 3.5em;
-    font-weight: 700;
+    font-size: 5em;
+    font-weight: 800;
     background: linear-gradient(135deg, #7b4fff, #4da8ff);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
     animation: fadeInDown 0.8s ease-out;
+    letter-spacing: -1px;
+}
+
+/* === Sous-titre === */
+h2 {
+    font-size: 1.5em;
+    font-weight: 500;
+    background: linear-gradient(135deg, #7b4fff, #4da8ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 25px;
+    opacity: 0.9;
 }
 
 /* === Texte d'introduction === */
-.intro-text {
-    font-size: 1.3em;
+p {
+    font-size: 1.2em;
     margin-bottom: 50px;
-    opacity: 0.85;
+    color: rgba(255, 255, 255, 0.75);
     font-weight: 400;
+    line-height: 1.6;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
     animation: fadeIn 1s ease-out 0.2s backwards;
 }
 
@@ -117,21 +134,15 @@ h1 {
     line-height: 1.4;
 }
 
-/* === Boutons spécifiques === */
-.game-button.puzzle .btn-content {
-    background: linear-gradient(135deg, #ff6b9d, #c06bff);
-}
-
-.game-button.puzzle:hover .btn-content {
-    background: linear-gradient(135deg, #ff7bae, #d07bff);
-}
-
+/* === Boutons spécifiques (même style) === */
+.game-button.puzzle .btn-content,
 .game-button.defense .btn-content {
-    background: linear-gradient(135deg, #4da8ff, #00d4ff);
+    background: linear-gradient(135deg, #7b4fff, #4da8ff);
 }
 
+.game-button.puzzle:hover .btn-content,
 .game-button.defense:hover .btn-content {
-    background: linear-gradient(135deg, #5db8ff, #1ae4ff);
+    background: linear-gradient(135deg, #8a5aff, #5db8ff);
 }
 
 /* === Focus pour accessibilité === */
@@ -184,7 +195,7 @@ h1 {
     }
     
     .intro-text {
-        opacity: 0.75;
+        opacity: 0.65;
     }
     
     .btn-content {
@@ -199,11 +210,15 @@ h1 {
 /* === Responsive === */
 @media (max-width: 768px) {
     h1 {
-        font-size: 2.5em;
+        font-size: 3.5em;
     }
     
-    .intro-text {
-        font-size: 1.1em;
+    h2 {
+        font-size: 1.3em;
+    }
+    
+    p {
+        font-size: 1.05em;
     }
     
     .menu-buttons {
@@ -227,7 +242,15 @@ h1 {
     }
     
     h1 {
-        font-size: 2em;
+        font-size: 2.5em;
+    }
+    
+    h2 {
+        font-size: 1.1em;
+    }
+    
+    p {
+        font-size: 0.95em;
     }
     
     .btn-content {
