@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<head>
+	<meta charset="utf-8">
+	<title>Défense du Village NIRD</title>
+	<link rel="stylesheet" type="text/css" href="stylesOS.css">
+
+</head>
+
+<body>
+
+<div class="header">
+    <h1>🛡 Défense du Village NIRD</h1>
+    <p>Protégeons le village contre les faux OS ! </p>
+</div>
+
+<div class="container">
+
+    <p id="score"></p>
+
+    <div class="grid" id="grid">
+      <div class="card" data-true="false">AcidOS</div>
+      <div class="card" data-true="true">Windows</div>
+      <div class="card" data-true="false">Dooring</div>
+      <div class="card" data-true="false">azerTY</div>
+      <div class="card" data-true="true">Unix</div>
+      <div class="card" data-true="true">Linux</div>
+      <div class="card" data-true="false">ABCD</div>
+      <div class="card" data-true="true">macOS</div>
+      <div class="card" data-true="false">GLaDOS</div>
+      <div class="card" data-true="false">Rainbows</div>
+      <div class="card" data-true="true">Android</div>
+      <div class="card" data-true="true">BSD</div>
+    </div>
+
+    <p id="linux-info">
+      🐧 Linux est un système d’exploitation libre et puissant, utilisé partout !  
+      C’est le héros des serveurs et des geeks 💪✨
+    </p>
+
+    <button id="replay-btn">Rejouer</button>
+</div>
+
+<script>
+const grid = document.getElementById('grid');
+const cards = Array.from(document.querySelectorAll('.card'));
+const linuxInfo = document.getElementById('linux-info');
+const replayBtn = document.getElementById('replay-btn');
+const scoreDisplay = document.getElementById("score");
+
+let totalTrue = cards.filter(c => c.getAttribute('data-true') === "true").length;
+let score = 0;
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function updateScore() {
+  scoreDisplay.textContent = `🔥 Bonnes réponses : ${score}/${totalTrue}`;
+}
+
+function resetGame() {
+  score = 0;
+  cards.forEach(card => {
+    card.classList.remove('correct','incorrect');
+    card.style.pointerEvents = "auto";
+  });
+  linuxInfo.style.display = "none";
+  replayBtn.style.display = "none";
+  grid.innerHTML = "";
+  shuffle([...cards]).forEach(card => grid.appendChild(card));
+  updateScore();
+}
+
+function revealAll() {
+  cards.forEach(card => {
+    const isTrue = card.getAttribute('data-true') === "true";
+    card.classList.add(isTrue ? 'correct' : 'incorrect');
+    card.style.pointerEvents = "none";
+  });
+}
+
+cards.forEach(card => {
+  card.addEventListener('click', () => {
+    if (card.classList.contains('correct') || card.classList.contains('incorrect')) return;
+
+    const isTrue = card.getAttribute('data-true') === "true";
+
+    if (isTrue) {
+      card.classList.add('correct');
+      score++;
+      updateScore();
+
+      if (card.textContent === "Linux") {
+        linuxInfo.style.display = "block";
+      }
+
+      if (score === totalTrue) {
+        linuxInfo.textContent = "🎉 Victoire ! Tu as défendu le village NIRD !";
+        linuxInfo.style.display = "block";
+        revealAll();
+        replayBtn.style.display = "inline-block";
+      }
+
+    } else {
+      card.classList.add('incorrect');
+      revealAll();
+      replayBtn.style.display = "inline-block";
+    }
+
+    card.style.pointerEvents = "none";
+  });
+});
+
+replayBtn.addEventListener('click', resetGame);
+
+shuffle(cards).forEach(card => grid.appendChild(card));
+updateScore();
+</script>
+
+</body>
+</html>

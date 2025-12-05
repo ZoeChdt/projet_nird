@@ -1,0 +1,110 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #6a8afc 0%, #7a4fd1 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 40px;
+}
+
+/* Header principal */
+.header {
+    text-align: center;
+    color: white;
+    margin-bottom: 20px;
+}
+.header h1 {
+    font-size: 36px;
+    font-weight: bold;
+    margin: 0;
+}
+.header p {
+    font-size: 18px;
+    opacity: 0.9;
+}
+
+/* --------- CONTENEUR BLANC --------- */
+.container {
+    width: 900px;
+    background: #ffffffdd;
+    border-radius: 22px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    padding: 30px;
+}
+
+/* Score */
+#score {
+    text-align: center;
+    font-size: 22px;
+    margin: 10px;
+    font-weight: bold;
+}
+
+/* -------- GRID -------- */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    padding: 20px;
+}
+
+/* ---------- Cartes ---------- */
+.card {
+    border-radius: 18px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    background: #f8f9ff;
+    border: 3px solid #4c59c9;
+    font-size: 18px;
+    transition: transform 0.22s, box-shadow 0.22s;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* Correct / Incorrect */
+.correct {
+    background: #4CAF50 !important;
+    color: white;
+    transform: scale(1.05);
+}
+.incorrect {
+    background: #E53935 !important;
+    color: white;
+    animation: shake 0.3s;
+}
+@keyframes shake {
+    25% {transform: translateX(-4px);}
+    50% {transform: translateX(4px);}
+    75% {transform: translateX(-4px);}
+}
+
+/* Infos Linux */
+#linux-info {
+    display:none;
+    text-align:center;
+    font-size:18px;
+    padding:20px;
+}
+
+/* Bouton rejouer */
+#replay-btn {
+    display:none;
+    margin: 20px auto;
+    padding:12px 25px;
+    font-size:18px;
+    cursor:pointer;
+    border-radius:40px;
+    border:0;
+    background: #6b79ff;
+    color: white;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.2);
+    transition: transform 0.2s;
+}
+#replay-btn:hover {
+    transform: scale(1.07);
+}
