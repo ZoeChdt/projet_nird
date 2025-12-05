@@ -135,13 +135,11 @@ p {
 }
 
 /* === Boutons spécifiques (même style) === */
-.game-button.puzzle .btn-content,
-.game-button.defense .btn-content {
+.game-button.btn-content{
     background: linear-gradient(135deg, #7b4fff, #4da8ff);
 }
 
-.game-button.puzzle:hover .btn-content,
-.game-button.defense:hover .btn-content {
+.game-button.puzzle:hover .btn-content {
     background: linear-gradient(135deg, #8a5aff, #5db8ff);
 }
 
