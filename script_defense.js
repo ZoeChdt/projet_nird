@@ -9,11 +9,13 @@ let enemySpawnInterval = 3000;
 let gameRunning = false;
 let spawnTimer = null;
 let enemies = [];
+let attackCount = 0; // Compteur d'attaques
 
 // Cooldowns des cartes
 let cardCooldowns = {
     'potion': false,
     'reemploi': false,
+    'double': false,
     'bouclier': false
 };
 
@@ -37,9 +39,12 @@ function initGame() {
     isShieldActive = false;
     gameRunning = true;
     enemies = [];
+    enemySpeed = 2;
+    attackCount = 0;
     cardCooldowns = {
         'potion': false,
         'reemploi': false,
+        'double': false,
         'bouclier': false
     };
     
@@ -137,7 +142,7 @@ function moveEnemy(enemy) {
         }
         
         let currentRight = parseInt(enemy.style.right) || 0;
-        currentRight += enemySpeed;
+        currentRight += enemySpeed-0.2;
         enemy.style.right = currentRight + 'px';
         
         // Si l'ennemi atteint le village
@@ -177,14 +182,25 @@ function attackEnemy(enemy) {
         return;
     }
     
+    // Déterminer les dégâts selon la carte
+    let damage = 1;
+    let cooldownTime = 1000;
+    
+    if (selectedCard === 'double') {
+        damage = 2;
+        cooldownTime = 3000;
+    }
+    
     // Réduire les HP de l'ennemi
     let currentHp = parseInt(enemy.dataset.hp);
-    currentHp--;
+    currentHp -= damage;
     enemy.dataset.hp = currentHp;
     
     // Mettre à jour l'affichage des HP
     const hpDisplay = enemy.querySelector('.enemy-hp');
-    hpDisplay.textContent = currentHp;
+    if (currentHp > 0) {
+        hpDisplay.textContent = currentHp;
+    }
     
     // Effet visuel d'attaque
     enemy.style.transform = 'scale(0.9)';
@@ -212,8 +228,12 @@ function attackEnemy(enemy) {
         }
     }
     
-    // Activer le cooldown de la carte (2 seconde pour potion et reemploi)
-    activateCooldown(selectedCard, 1000);
+    // Augmenter la vitesse progressivement
+    attackCount++;
+    enemySpeed = 2 + (attackCount * 0.2);
+    
+    // Activer le cooldown de la carte
+    activateCooldown(selectedCard, cooldownTime);
 }
 
 // Activer le bouclier
