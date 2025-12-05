@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PC Survivor - Sauve ton ordinateur !</title>
+<link rel="stylesheet" href="style-vdpc.css">
+</head>
+<body>
+<div id="game-container">
+<!-- Écran d'accueil -->
+<div id="menu-screen" class="screen active">
+<div class="pc-sprite big bounce"></div>
+<h1 class="pixel-title">PC SURVIVOR</h1>
+<p class="subtitle">Tu es un PC de 3 ans menacé d'être jeté...</p>
+<p class="challenge">Prouve ta valeur en 5 jours !</p>
+<div class="eco-message">
+<span class="leaf-icon"></span>
+<p>Chaque ordinateur réparé = 200kg de CO2 économisés !</p>
+</div>
+<button class="pixel-btn start-btn" onclick="startGame()">COMMENCER L'AVENTURE</button>
+</div>
+
+```
+<!-- Interface de jeu principale -->
+<div id="game-screen" class="screen">
+<!-- HUD -->
+<div id="hud">
+<div class="hud-left">
+<div class="lives">
+<span class="label">VIES:</span>
+<span id="hearts">❤️❤️❤️</span>
+</div>
+<div class="day-counter">
+<span class="label">JOUR:</span>
+<span id="current-day">1</span>/5
+</div>
+</div>
+<div class="hud-center">
+<div class="score-display">
+<span class="label">SCORE:</span>
+<span id="score">0</span>
+</div>
+<div class="timer">
+<span class="label">⏱️</span>
+<span id="timer">60</span>s
+</div>
+</div>
+<div class="hud-right">
+<div class="eco-bar">
+<span class="label">CO2 ÉCONOMISÉ:</span>
+<div class="bar-container">
+<div id="eco-fill" class="bar-fill"></div>
+</div>
+<span id="eco-value">0</span>kg
+</div>
+</div>
+</div>
+
+<!-- Zone de jeu -->
+<div id="game-area">
+<canvas id="game-canvas"></canvas>
+</div>
+
+<!-- Message du jour -->
+<div id="day-intro" class="modal">
+<div class="modal-content">
+<div class="pc-sprite thinking"></div>
+<h2 id="day-title">JOUR 1</h2>
+<h3 id="day-mission">Défragmentation du disque</h3>
+<p id="day-description">Les fichiers sont éparpillés ! Organise-les comme dans Tetris !</p>
+<button class="pixel-btn" onclick="startDay()">C'EST PARTI !</button>
+</div>
+</div>
+</div>
+
+<!-- Écran de fin de journée -->
+<div id="day-complete-screen" class="screen">
+<div class="modal-content">
+<div class="pc-sprite happy"></div>
+<h2>JOUR TERMINÉ !</h2>
+<div class="stats">
+<p>Score: <span id="day-score">0</span></p>
+<p>CO2 économisé: <span id="day-eco">0</span>kg</p>
+<p class="eco-tip" id="eco-tip"></p>
+</div>
+<button class="pixel-btn" onclick="nextDay()">JOUR SUIVANT</button>
+</div>
+</div>
+
+<!-- Écran Game Over -->
+<div id="gameover-screen" class="screen">
+<div class="modal-content">
+<div class="pc-sprite sad"></div>
+<h2>JETÉ À LA POUBELLE...</h2>
+<p class="impact-message">Un PC jeté = 200kg de CO2 gaspillés</p>
+<p>Score final: <span id="final-score">0</span></p>
+<button class="pixel-btn" onclick="restartGame()">RÉESSAYER</button>
+</div>
+</div>
+
+<!-- Écran Victoire -->
+<div id="victory-screen" class="screen">
+<div class="modal-content">
+<div class="pc-sprite victory"></div>
+<h2 class="rainbow">TU AS GAGNÉ ! </h2>
+<p class="impact-message">Tu as sauvé ce PC !</p>
+<div class="victory-stats">
+<p>Score total: <span id="victory-score">0</span></p>
+<p>CO2 économisé: <span id="victory-eco">0</span>kg</p>
+<p class="big-message">Chaque réparation compte pour la planète ! </p>
+</div>
+<button class="pixel-btn" onclick="restartGame()">REJOUER</button>
+</div>
+</div>
+</div>
+
+<script>
+// === VARIABLES GLOBALES ===
+let gameState = 'menu';
+let currentDay = 1;
+let lives = 3;
+let score = 0;
+let ecoScore = 0;
+let timer = 60;
+let timerInterval;
+let canvas, ctx;
+let gameLoopId;
+
+// === MESSAGES ÉCOLO ===
+const ecoTips = [
+"Réparer = 10x moins de CO2 que racheter !",
+"Un PC réparé peut durer 5 ans de plus !",
+"80% des composants sont recyclables !",
+"Les déchets électroniques polluent massivement",
+"Un PC reconditionné consomme 0 ressource neuve !"
+];
+
+// === JOUR 1: TETRIS (Défragmentation) ===
+let tetrisGrid = [];
+let currentPiece = null;
+let pieceX = 0, pieceY = 0;
+let pieceColor = 0;
+let dropCounter = 0;
+let dropInterval = 1000;
+let lastTime = 0;
+const GRID_WIDTH = 10;
+const GRID_HEIGHT = 16;
+const BLOCK_SIZE = 25;
+
+const tetrisPieces = [
+[[1,1,1,1]], // I
+[[1,1],[1,1]], // O
+[[0,1,0],[1,1,1]], // T
+[[1,1,0],[0,1,1]], // S
+[[0,1,1],[1,1,0]], // Z
+[[1,0,0],[1,1,1]], // L
+[[0,0,1],[1,1,1]] // J
+];
+
+const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE'];
+
+// === JOUR 2: SPACE INVADERS (Anti-virus) ===
+let player = { x: 0, y: 0, width: 40, height: 30 };
+let bullets = [];
+let enemies = [];
+let enemyBullets = [];
+let enemyDirection = 1;
+let enemyMoveCounter = 0;
+
+// === JOUR 3: CASSE-BRIQUES (Optimisation RAM) ===
+let paddle = { x: 0, y: 0, width: 80, height: 15 };
+let ball = { x: 0, y: 0, dx: 0, dy: 0, radius: 8 };
+let bricks = [];
+
+// === JOUR 4: QUIZ + RAPIDITÉ ===
+let quizScore = 0;
+let rapidityScore = 0;
+let targets = [];
+let currentQuestion = 0;
+let quizMode = true;
+
+const quizQuestions = [
+{ q: "Combien de kg de CO₂ pour fabriquer un PC ?", a: ["50kg", "200kg", "500kg"], correct: 1 },
+{ q: "Quelle est la durée de vie moyenne d'un PC ?", a: ["2 ans", "5 ans", "10 ans"], correct: 1 },
+{ q: "Quel composant consomme le plus d'énergie ?", a: ["Écran", "Processeur", "RAM"], correct: 0 }
+];
+
+// === JOUR 5: BOSS FINAL ===
+let bossHealth = 100;
+let bossAttacks = [];
+let bossX = 0;
+let bossDirection = 1;
+
+// === INITIALISATION ===
+function init() {
+canvas = document.getElementById('game-canvas');
+ctx = canvas.getContext('2d');
+canvas.width = 600;
+canvas.height = 500;
+
+// Écouteurs clavier
+document.addEventListener('keydown', handleKeyPress);
+
+// Clic pour jour 4
+canvas.addEventListener('click', handleCanvasClick);
+}
+
+function startGame() {
+hideAllScreens();
+document.getElementById('game-screen').classList.add('active');
+currentDay = 1;
+lives = 3;
+score = 0;
+ecoScore = 0;
+updateHUD();
+showDayIntro();
+}
+
+function showDayIntro() {
+const intros = [
+{ title: "JOUR 1 - DÉFRAGMENTATION", mission: "Organise les fichiers !", desc: "Utilise les flèches pour déplacer les blocs. Complète des lignes pour gagner !" },
+{ title: "JOUR 2 - ANTI-VIRUS", mission: "Élimine les virus !", desc: "Tire avec ESPACE. Évite les malwares qui tombent !" },
+{ title: "JOUR 3 - OPTIMISATION RAM", mission: "Casse les blocs défectueux !", desc: "Déplace la barre avec les flèches. Ne laisse pas tomber la balle !" },
+{ title: "JOUR 4 - QUIZ ÉCOLO", mission: "Montre tes connaissances !", desc: "Réponds aux questions puis clique rapidement sur les bons composants !" },
+{ title: "JOUR 5 - BOSS FINAL", mission: "Affronte le Virus Géant !", desc: "Combine toutes tes compétences pour gagner !" }
+];
+
+document.getElementById('day-title').textContent = intros[currentDay-1].title;
+document.getElementById('day-mission').textContent = intros[currentDay-1].mission;
+document.getElementById('day-description').textContent = intros[currentDay-1].desc;
+document.getElementById('day-intro').classList.add('active');
+}
+
+function startDay() {
+document.getElementById('day-intro').classList.remove('active');
+timer = currentDay === 1 ? 90 : currentDay === 4 ? 45 : 60;
+startTimer();
+
+// Initialiser le jeu du jour
+switch(currentDay) {
+case 1: initTetris(); break;
+case 2: initSpaceInvaders(); break;
+case 3: initBreakout(); break;
+case 4: initQuiz(); break;
+case 5: initBoss(); break;
+}
+
+gameState = 'playing';
+gameLoop();
+}
+
+// === JOUR 1: TETRIS ===
+function initTetris() {
+tetrisGrid = Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(0));
+dropCounter = 0;
+lastTime = 0;
+spawnPiece();
+}
+
+function spawnPiece() {
+currentPiece = JSON.parse(JSON.stringify(tetrisPieces[Math.floor(Math.random() * tetrisPieces.length)]));
+pieceColor = Math.floor(Math.random() * colors.length);
+pieceX = Math.floor(GRID_WIDTH / 2) - 1;
+pieceY = 0;
+
+if(checkCollision()) {
+loseLife();
+initTetris();
+}
+}
+
+function drawTetris() {
+ctx.fillStyle = '#1a1a2e';
+ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+// Grille
+for(let y = 0; y < GRID_HEIGHT; y++) {
+for(let x = 0; x < GRID_WIDTH; x++) {
+if(tetrisGrid[y][x]) {
+ctx.fillStyle = colors[tetrisGrid[y][x] - 1];
+ctx.fillRect(x * BLOCK_SIZE + 100, y * BLOCK_SIZE, BLOCK_SIZE - 2, BLOCK_SIZE - 2);
+}
+}
+}
+
+// Pièce actuelle
+if(currentPiece) {
+ctx.fillStyle = colors[pieceColor];
+for(let y = 0; y < currentPiece.length; y++) {
+for(let x = 0; x < currentPiece[y].length; x++) {
+if(currentPiece[y][x]) {
+ctx.fillRect((pieceX + x) * BLOCK_SIZE + 100, (pieceY + y) * BLOCK_SIZE, BLOCK_SIZE - 2, BLOCK_SIZE - 2);
+}
+}
+}
+}
+
+// Instructions
+ctx.fillStyle = '#FFF';
+ctx.font = '14px monospace';
+ctx.fillText('Flèches: Déplacer', 10, 30);
+ctx.fillText('Bas: Descendre vite', 10, 50);
+}
+
+function updateTetris(deltaTime) {
+dropCounter += deltaTime;
+if(dropCounter > dropInterval) {
+moveTetrisPiece(0, 1);
+dropCounter = 0;
+}
+}
+
+function moveTetrisPiece(dx, dy) {
+pieceX += dx;
+pieceY += dy;
+if(checkCollision()) {
+pieceX -= dx;
+pieceY -= dy;
+if(dy > 0) {
+mergePiece();
+clearLines();
+spawnPiece();
+}
+}
+}
+
+function rotateTetrisPiece() {
+const rotated = currentPiece[0].map((_, i) =>
+currentPiece.map(row => row[i]).reverse()
+);
+const previousPiece = currentPiece;
+currentPiece = rotated;
+if(checkCollision()) {
+currentPiece = previousPiece;
+}
+}
+
+function checkCollision() {
+for(let y = 0; y < currentPiece.length; y++) {
+for(let x = 0; x < currentPiece[y].length; x++) {
+if(currentPiece[y][x]) {
+let newX = pieceX + x;
+let newY = pieceY + y;
+if(newX < 0 || newX >= GRID_WIDTH || newY >= GRID_HEIGHT) return true;
+if(newY >= 0 && tetrisGrid[newY][newX]) return true;
+}
+}
+}
+return false;
+}
+
+function mergePiece() {
+for(let y = 0; y < currentPiece.length; y++) {
+for(let x = 0; x < currentPiece[y].length; x++) {
+if(currentPiece[y][x]) {
+if(pieceY + y >= 0) {
+tetrisGrid[pieceY + y][pieceX + x] = pieceColor + 1;
+}
+}
+}
+}
+}
+
+function clearLines() {
+let linesCleared = 0;
+for(let y = GRID_HEIGHT - 1; y >= 0; y--) {
+if(tetrisGrid[y].every(cell => cell !== 0)) {
+tetrisGrid.splice(y, 1);
+tetrisGrid.unshift(Array(GRID_WIDTH).fill(0));
+linesCleared++;
+y++;
+}
+}
+if(linesCleared > 0) {
+score += linesCleared * 100;
+ecoScore += linesCleared * 5;
+updateHUD();
+}
+}
+
+// === JOUR 2: SPACE INVADERS ===
+function initSpaceInvaders() {
+player = { x: canvas.width / 2, y: canvas.height - 50, width: 40, height: 30 };
+bullets = [];
+enemies = [];
+enemyBullets = [];
+enemyDirection = 1;
+enemyMoveCounter = 0;
+
+for(let i = 0; i < 5; i++) {
+for(let j = 0; j < 8; j++) {
+enemies.push({ x: j * 60 + 50, y: i * 40 + 30, width: 35, height: 35, alive: true });
+}
+}
+}
+
+function drawSpaceInvaders() {
+ctx.fillStyle = '#0f0f1e';
+ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+// Joueur (PC)
+ctx.fillStyle = '#4ECDC4';
+ctx.fillRect(player.x, player.y, player.width, player.height);
+ctx.font = '25px monospace';
+ctx.fillText('\uD83D\uDDA5️', player.x + 5, player.y + 25);
+
+// Ennemis (Virus)
+enemies.forEach(enemy => {
+if(enemy.alive) {
+ctx.fillStyle = '#FF6B6B';
+ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+ctx.fillText('\uD83E\uDDA0', enemy.x + 5, enemy.y + 25);
+}
+});
+
+// Balles
+ctx.fillStyle = '#FFA07A';
+bullets.forEach(bullet => {
+ctx.fillRect(bullet.x, bullet.y, 4, 10);
+});
+
+enemyBullets.forEach(bullet => {
+ctx.fillStyle = '#FF6B6B';
+ctx.fillRect(bullet.x, bullet.y, 4, 10);
+});
+
+// Instructions
+ctx.fillStyle = '#FFF';
+ctx.font = '14px monospace';
+ctx.fillText('Flèches: Bouger | Espace: Tirer', 10, 490);
+}
+
+function updateSpaceInvaders() {
+// Déplacement balles
+bullets = bullets.filter(b => {
+b.y -= 8;
+// Collision avec ennemis
+enemies.forEach(enemy => {
+if(enemy.alive && b.x > enemy.x && b.x < enemy.x + enemy.width &&
+b.y > enemy.y && b.y < enemy.y + enemy.height) {
+enemy.alive = false;
+b.y = -10;
+score += 50;
+ecoScore += 3;
+updateHUD();
+}
+});
+return b.y > 0;
+});
+
+// Déplacement ennemis
+enemyMoveCounter++;
+if(enemyMoveCounter > 30) {
+let needsToMoveDown = false;
+enemies.forEach(e => {
+if(e.alive) {
+e.x += enemyDirection * 10;
+if(e.x <= 0 || e.x >= canvas.width - e.width) {
+needsToMoveDown = true;
+}
+}
+});
+
+if(needsToMoveDown) {
+enemyDirection *= -1;
+enemies.forEach(e => { if(e.alive) e.y += 20; });
+}
+enemyMoveCounter = 0;
+}
+
+// Balles ennemies
+if(Math.random() < 0.02) {
+let aliveEnemies = enemies.filter(e => e.alive);
+if(aliveEnemies.length > 0) {
+let shooter = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
+enemyBullets.push({ x: shooter.x + 15, y: shooter.y + 35 });
+}
+}
+
+enemyBullets = enemyBullets.filter(b => {
+b.y += 4;
+if(b.x > player.x && b.x < player.x + player.width &&
+b.y > player.y && b.y < player.y + player.height) {
+loseLife();
+return false;
+}
+return b.y < canvas.height;
+});
+
+// Vérifier victoire
+if(enemies.every(e => !e.alive)) {
+completeDay();
+}
+
+// Vérifier défaite (ennemis trop bas)
+if(enemies.some(e => e.alive && e.y > canvas.height - 100)) {
+loseLife();
+initSpaceInvaders();
+}
+}
+
+// === JOUR 3: CASSE-BRIQUES ===
+function initBreakout() {
+paddle = { x: canvas.width / 2 - 40, y: canvas.height - 30, width: 80, height: 15 };
+ball = { x: canvas.width / 2, y: canvas.height / 2, dx: 4, dy: -4, radius: 8 };
+bricks = [];
+
+for(let i = 0; i < 5; i++) {
+for(let j = 0; j < 10; j++) {
+bricks.push({ x: j * 60, y: i * 25 + 30, width: 55, height: 20, alive: true, color: i });
+}
+}
+}
+
+function drawBreakout() {
+ctx.fillStyle = '#1a1a2e';
+ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+// Paddle
+ctx.fillStyle = '#4ECDC4';
+ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
+
+// Balle
+ctx.fillStyle = '#FFA07A';
+ctx.beginPath();
+ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+ctx.fill();
+
+// Briques
+bricks.forEach(brick => {
+if(brick.alive) {
+ctx.fillStyle = colors[brick.color];
+ctx.fillRect(brick.x, brick.y, brick.width, brick.height);
+}
+});
+
+// Instructions
+ctx.fillStyle = '#FFF';
+ctx.font = '14px monospace';
+ctx.fillText('Flèches: Déplacer la barre', 10, 490);
+}
+
+function updateBreakout() {
+ball.x += ball.dx;
+ball.y += ball.dy;
+
+// Rebonds murs
+if(ball.x < ball.radius || ball.x > canvas.width - ball.radius) ball.dx *= -1;
+if(ball.y < ball.radius) ball.dy *= -1;
+
+// Collision paddle
+if(ball.y + ball.radius > paddle.y &&
+ball.x > paddle.x && ball.x < paddle.x + paddle.width &&
+ball.dy > 0) {
+ball.dy *= -1;
+// Effet de direction selon où la balle touche le paddle
+let hitPos = (ball.x - paddle.x) / paddle.width;
+ball.dx = (hitPos - 0.5) * 8;
+}
+
+// Collision briques
+bricks.forEach(brick => {
+if(brick.alive && ball.x > brick.x && ball.x < brick.x + brick.width &&
+ball.y - ball.radius < brick.y + brick.height && ball.y + ball.radius > brick.y) {
+brick.alive = false;
+ball.dy *= -1;
+score += 20;
+ecoScore += 2;
+updateHUD();
+}
+});
+
+// Perte
+if(ball.y > canvas.height) {
+loseLife();
+if(lives > 0) {
+ball = { x: canvas.width / 2, y: canvas.height / 2, dx: 4, dy: -4, radius: 8 };
+}
+}
+
+// Victoire
+if(bricks.every(b => !b.alive)) {
+completeDay();
+}
+}
+
+// === JOUR 4: QUIZ ===
+function initQuiz() {
+currentQuestion = 0;
+quizMode = true;
+drawQuizQuestion();
+}
+
+function drawQuizQuestion() {
+ctx.fillStyle = '#1a1a2e';
+ctx.fillRect(0, 0, canvas.width, canvas.height);
+ctx.fillStyle = '#FFF';
+ctx.font = '18px monospace';
+
+if(currentQuestion < quizQuestions.length) {
+ctx.fillText('Réponds avec 1, 2 ou 3', 150, 100);
+
+ctx.fillStyle = '#4ECDC4';
+ctx.font = '16px monospace';
+const q = quizQuestions[currentQuestion];
+ctx.fillText(q.q, 50, 200);
+
+ctx.fillStyle = '#FFF';
+q.a.forEach((ans, i) => {
+ctx.fillText(`${i+1}. ${ans}`, 100, 250 + i * 40);
+});
+}
+}
+
+function checkQuizAnswer(answer) {
+if(answer === quizQuestions[currentQuestion].correct) {
+score += 100;
+ecoScore += 10;
+updateHUD();
+} else {
+score -= 20;
+}
+
+currentQuestion++;
+
+if(currentQuestion >= quizQuestions.length) {
+quizMode = false;
+setTimeout(() => initRapidity(), 500);
+} else {
+drawQuizQuestion();
+}
+}
+
+function initRapidity() {
+targets = [];
+for(let i = 0; i < 15; i++) {
+targets.push({
+x: Math.random() * (canvas.width - 50) + 10,
+y: Math.random() * (canvas.height - 100) + 50,
+good: Math.random() > 0.4,
+size: 35
+});
+}
+drawRapidity();
+}
+
+function drawRapidity() {
+ctx.fillStyle = '#1a1a2e';
+ctx.fillRect(0, 0, canvas.width, canvas.height);
+ctx.fillStyle = '#FFF';
+ctx.font = '18px monospace';
+ctx.fillText('Clique sur les composants verts ! ⚡', 120, 30);
+
+targets.forEach(t => {
+ctx.fillStyle = t.good ? '#4ECDC4' : '#FF6B6B';
+ctx.fillRect(t.x, t.y, t.size, t.size);
+ctx.font = '25px monospace';
+ctx.fillText(t.good ? '\uD83D\uDCBE' : '\uD83D\uDDD1️', t.x + 5, t.y + 27);
+});
+}
+
+function handleCanvasClick(e) {
+if(currentDay === 4 && !quizMode && targets.length > 0) {
+const rect = canvas.getBoundingClientRect();
+const x = e.clientX - rect.left;
+const y = e.clientY - rect.top;
+
+targets = targets.filter(t => {
+if(x > t.x && x < t.x + t.size && y > t.y && y < t.y + t.size) {
+if(t.good) {
+score += 50;
+ecoScore += 5;
+} else {
+score -= 10;
+}
+updateHUD();
+return false;
+}
+return true;
+});
+
+drawRapidity();
+
+if(targets.filter(t => t.good).length === 0) {
+completeDay();
+}
+}
+}
+
+// === JOUR 5: BOSS ===
+function initBoss() {
+bossHealth = 100;
+bossX = canvas.width / 2 - 60;
+bossDirection = 1;
+player = { x: canvas.width / 2 - 20, y: canvas.height - 60, width: 40, height: 30 };
+bullets = [];
+bossAttacks = [];
+}
+
+function drawBoss() {
+ctx.fillStyle = '#0f0f1e';
+ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+// Boss
+ctx.fillStyle = '#FF6B6B';
+ctx.fillRect(bossX, 50, 120, 100);
+ctx.font = '60px monospace';
+ctx.fillText('\uD83D\uDC7E', bossX + 25, 110);
+
+// Barre de vie boss
+ctx.fillStyle = '#333';
+ctx.fillRect(50, 20, 500, 25);
+ctx.fillStyle = bossHealth > 30 ? '#FF6B6B' : '#FFA07A';
+ctx.fillRect(50, 20, bossHealth * 5, 25);
+ctx.fillStyle = '#FFF';
+ctx.font = '14px monospace';
+ctx.fillText(`BOSS: ${bossHealth}%`, 250, 35);
+
+// Joueur
+ctx.fillStyle = '#4ECDC4';
+ctx.fillRect(player.x, player.y, player.width, player.height);
+ctx.font = '25px monospace';
+ctx.fillText('\uD83D\uDDA5️', player.x + 5, player.y + 25);
+
+// Balles
+bullets.forEach(b => {
+ctx.fillStyle = '#FFA07A';
+ctx.fillRect(b.x, b.y, 4, 12);
+});
+
+bossAttacks.forEach(a => {
+ctx.fillStyle = '#FF6B6B';
+ctx.beginPath();
+ctx.arc(a.x, a.y, 15, 0, Math.PI * 2);
+ctx.fill();
+});
+
+// Instructions
+ctx.fillStyle = '#FFF';
+ctx.font = '14px monospace';
+ctx.fillText('Flèches: Bouger | Espace: Tirer', 10, 490);
+}
+
+function updateBoss() {
+// Déplacement boss
+bossX += bossDirection * 2;
+if(bossX <= 0 || bossX >= canvas.width - 120) {
+bossDirection *= -1;
+}
+
+// Balles joueur
+bullets = bullets.filter(b => {
+b.y -= 7;
+if(b.y < 150 && b.x > bossX && b.x < bossX + 120) {
+bossHealth -= 1;
+score += 10;
+ecoScore += 1;
+updateHUD();
+return false;
+}
+return b.y > 0;
+});
+
+// Attaques boss
+if(Math.random() < 0.03) {
+bossAttacks.push({
+x: bossX + 60,
+y: 150,
+dx: (player.x - bossX) / 100,
+dy: 3
+});
+}
+
+bossAttacks = bossAttacks.filter(a => {
+a.x += a.dx;
+a.y += a.dy;
+
+let dist = Math.sqrt(Math.pow(a.x - (player.x + 20), 2) + Math.pow(a.y - (player.y + 15), 2));
+if(dist < 25) {
+loseLife();
+return false;
+}
+return a.y < canvas.height;
+});
+
+// Victoire
+if(bossHealth <= 0) {
+score += 500;
+ecoScore += 50;
+updateHUD();
+winGame();
+}
+}
+
+// === CONTRÔLES ===
+function handleKeyPress(e) {
+if(gameState !== 'playing') return;
+
+// Bloquer les flèches SEULEMENT pendant le jeu
+if(['ArrowLeft', 'ArrowRight', 'ArrowDown', 'ArrowUp', ' '].includes(e.key)) {
+e.preventDefault();
+}
+
+switch(currentDay) {
+case 1: // Tetris
+if(e.key === 'ArrowLeft') moveTetrisPiece(-1, 0);
+if(e.key === 'ArrowRight') moveTetrisPiece(1, 0);
+if(e.key === 'ArrowDown') moveTetrisPiece(0, 1);
+if(e.key === 'ArrowUp') rotateTetrisPiece();
+break;
+case 2: // Space Invaders
+if(e.key === 'ArrowLeft') player.x = Math.max(0, player.x - 20);
+if(e.key === 'ArrowRight') player.x = Math.min(canvas.width - player.width, player.x + 20);
+if(e.key === ' ') {
+bullets.push({ x: player.x + 18, y: player.y });
+}
+break;
+case 3: // Breakout
+if(e.key === 'ArrowLeft') paddle.x = Math.max(0, paddle.x - 25);
+if(e.key === 'ArrowRight') paddle.x = Math.min(canvas.width - paddle.width, paddle.x + 25);
+break;
+case 4: // Quiz
+if(quizMode && (e.key === '1' || e.key === '2' || e.key === '3')) {
+checkQuizAnswer(parseInt(e.key) - 1);
+}
+break;
+case 5: // Boss
+if(e.key === 'ArrowLeft') player.x = Math.max(0, player.x - 20);
+if(e.key === 'ArrowRight') player.x = Math.min(canvas.width - player.width, player.x + 20);
+if(e.key === ' ') {
+bullets.push({ x: player.x + 18, y: player.y });
+}
+break;
+}
+}
+
+// === GAME LOOP ===
+function gameLoop(time = 0) {
+if(gameState !== 'playing') return;
+
+const deltaTime = time - lastTime;
+lastTime = time;
+
+switch(currentDay) {
+case 1:
+drawTetris();
+updateTetris(deltaTime);
+break;
+case 2:
+drawSpaceInvaders();
+updateSpaceInvaders();
+break;
+case 3:
+drawBreakout();
+updateBreakout();
+break;
+case 5:
+drawBoss();
+updateBoss();
+break;
+}
+
+gameLoopId = requestAnimationFrame(gameLoop);
+}
+
+// === TIMER ===
+function startTimer() {
+clearInterval(timerInterval);
+timerInterval = setInterval(() => {
+timer--;
+document.getElementById('timer').textContent = timer;
+if(timer <= 0) {
+clearInterval(timerInterval);
+if(currentDay < 5) {
+completeDay();
+} else {
+loseLife();
+}
+}
+}, 1000);
+}
+
+// === GESTION DES VIES ===
+function loseLife() {
+lives--;
+updateHUD();
+if(lives <= 0) {
+gameOver();
+}
+}
+
+function updateHUD() {
+document.getElementById('hearts').textContent = '❤️'.repeat(Math.max(0, lives));
+document.getElementById('current-day').textContent = currentDay;
+document.getElementById('score').textContent = score;
+document.getElementById('eco-value').textContent = ecoScore;
+document.getElementById('eco-fill').style.width = Math.min(100, ecoScore / 2) + '%';
+}
+
+// === FIN DE JOURNÉE ===
+function completeDay() {
+gameState = 'dayComplete';
+clearInterval(timerInterval);
+cancelAnimationFrame(gameLoopId);
+
+document.getElementById('day-score').textContent = score;
+document.getElementById('day-eco').textContent = ecoScore;
+document.getElementById('eco-tip').textContent = ecoTips[Math.floor(Math.random() * ecoTips.length)];
+
+hideAllScreens();
+document.getElementById('day-complete-screen').classList.add('active');
+}
+
+function nextDay() {
+currentDay++;
+if(currentDay > 5) {
+winGame();
+} else {
+hideAllScreens();
+document.getElementById('game-screen').classList.add('active');
+updateHUD();
+showDayIntro();
+}
+}
+
+// === GAME OVER ===
+function gameOver() {
+gameState = 'gameOver';
+clearInterval(timerInterval);
+cancelAnimationFrame(gameLoopId);
+document.getElementById('final-score').textContent = score;
+hideAllScreens();
+document.getElementById('gameover-screen').classList.add('active');
+}
+
+// === VICTOIRE ===
+function winGame() {
+gameState = 'victory';
+clearInterval(timerInterval);
+cancelAnimationFrame(gameLoopId);
+document.getElementById('victory-score').textContent = score;
+document.getElementById('victory-eco').textContent = ecoScore;
+hideAllScreens();
+document.getElementById('victory-screen').classList.add('active');
+}
+
+// === RESTART ===
+function restartGame() {
+currentDay = 1;
+lives = 3;
+score = 0;
+ecoScore = 0;
+timer = 60;
+gameState = 'menu';
+clearInterval(timerInterval);
+cancelAnimationFrame(gameLoopId);
+hideAllScreens();
+document.getElementById('menu-screen').classList.add('active');
+}
+
+// === UTILITAIRES ===
+function hideAllScreens() {
+document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+document.getElementById('day-intro').classList.remove('active');
+}
+
+// === INITIALISATION AU CHARGEMENT ===
+window.onload = init;
+</script>
+</body>
+</html>
