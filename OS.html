@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="utf-8">
+	<title>Jeu : Quels sont les OS ?</title>
+	<link rel="stylesheet" type="text/css" href="stylesOS.css">
+</head>
+
+<body>
+
+<h2>Selon vous, quels sont les OS qui existent ?</h2>
+
+<div class="grid" id="grid">
+  <div class="card" data-true="false">AcidOS</div>
+  <div class="card" data-true="true">Windows</div>
+  <div class="card" data-true="false">Dooring</div>
+  <div class="card" data-true="false">azerTY</div>
+  <div class="card" data-true="true">Unix</div>
+  <div class="card" data-true="true">Linux</div>
+  <div class="card" data-true="false">ABCD</div>
+  <div class="card" data-true="true">macOS</div>
+  <div class="card" data-true="false">GLaDOS</div>
+  <div class="card" data-true="false">Rainbows</div>
+  <div class="card" data-true="true">Android</div>
+  <div class="card" data-true="true">BSD</div>
+</div>
+
+<p id="linux-info" style="display:none; text-align:center; font-size:18px; padding:20px;">
+  Linux est un système d’exploitation libre, puissant et utilisé partout !  
+  Des serveurs aux smartphones, il est le premier pas vers un monde numérique indépendant !
+</p>
+
+<button id="replay-btn" style="display:none; margin: 10px auto; padding:10px 20px;
+font-size:18px; cursor:pointer; border-radius:10px; border:2px solid #000;">
+  Rejouer
+</button>
+
+<script>
+const grid = document.getElementById('grid');
+const cards = Array.from(document.querySelectorAll('.card'));
+const linuxInfo = document.getElementById('linux-info');
+const replayBtn = document.getElementById('replay-btn');
+
+// Mélange aléatoire (Fisher–Yates)
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function resetGame() {
+  cards.forEach(card => {
+    card.classList.remove('correct', 'incorrect');
+  });
+  linuxInfo.style.display = "none";
+  replayBtn.style.display = "none";
+
+  const shuffledCards = shuffle([...cards]);
+  grid.innerHTML = "";
+  shuffledCards.forEach(card => grid.appendChild(card));
+
+  // Ré-activer les clics
+  cards.forEach(card => card.style.pointerEvents = "auto");
+}
+
+// Fonction pour révéler toutes les cartes
+function revealAll() {
+  cards.forEach(card => {
+    const isTrue = card.getAttribute('data-true') === "true";
+    if (isTrue) {
+      card.classList.add('correct');
+    } else {
+      card.classList.add('incorrect');
+    }
+  });
+}
+
+cards.forEach(card => {
+  card.addEventListener('click', () => {
+    // Empêche les re-clics
+    if (card.classList.contains('correct') || card.classList.contains('incorrect')) return;
+
+    const isTrue = card.getAttribute('data-true') === "true";
+
+    if (isTrue) {
+      card.classList.add('correct');
+      // Affiche l'info Linux si c'est la carte Linux
+      if (card.textContent === "Linux") {
+        linuxInfo.style.display = "block";
+      }
+    } else {
+      card.classList.add('incorrect');
+      // Mort subite : révèle toutes les cartes et désactive les clics
+      revealAll();
+      cards.forEach(c => c.style.pointerEvents = "none");
+      replayBtn.style.display = "inline-block";
+    }
+  });
+});
+
+// Clic sur "Rejouer"
+replayBtn.addEventListener('click', resetGame);
+
+// Mélange initial
+shuffle(cards).forEach(card => grid.appendChild(card));
+
+</script>
+
+</body>
+</html>
