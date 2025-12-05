@@ -10,18 +10,6 @@ body {
     min-height: 100vh;
     overflow-x: hidden;
 }
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Arial', sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-    overflow-x: hidden;
-}
 
 header {
     text-align: center;
@@ -219,7 +207,7 @@ main {
 #cards-container {
     display: flex;
     justify-content: space-around;
-    gap: 20px;
+    gap: 15px;
 }
 
 .card {
@@ -227,7 +215,7 @@ main {
     border: 3px solid #333;
     border-radius: 15px;
     padding: 15px;
-    width: 180px;
+    width: 160px;
     text-align: center;
     cursor: pointer;
     transition: all 0.3s;
@@ -292,392 +280,24 @@ main {
     color: #666;
 }
 
-.card.selected .card-description {
-    color: rgba(255,255,255,0.9);
-}
-
-/* Écran de fin */
-#game-over {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.9);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    animation: fadeIn 0.5s;
-}
-
-#game-over.hidden {
-    display: none;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-#game-over-content {
-    background: white;
-    padding: 40px;
-    border-radius: 20px;
-    text-align: center;
-    max-width: 500px;
-    animation: slideUp 0.5s;
-}
-
-@keyframes slideUp {
-    from { 
-        transform: translateY(50px);
-        opacity: 0;
-    }
-    to { 
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-
-#game-over.victory #result-title {
-    color: #27ae60;
-    font-size: 48px;
-    margin-bottom: 20px;
-}
-
-#game-over.defeat #result-title {
-    color: #e74c3c;
-    font-size: 48px;
-    margin-bottom: 20px;
-}
-
-#result-message {
-    font-size: 18px;
-    line-height: 1.6;
-    margin-bottom: 30px;
-    color: #333;
-}
-
-#restart-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    padding: 15px 40px;
-    font-size: 18px;
-    font-weight: bold;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: transform 0.3s;
-    margin-right: 10px;
-}
-
-#restart-btn:hover {
-    transform: scale(1.05);
-}
-
-.back-btn {
-    display: inline-block;
-    background: #95a5a6;
-    color: white;
-    text-decoration: none;
-    padding: 15px 40px;
-    font-size: 18px;
-    font-weight: bold;
-    border-radius: 10px;
-    transition: transform 0.3s;
-}
-
-.back-btn:hover {
-    transform: scale(1.05);
-    background: #7f8c8d;
-}
-
-/* Responsive */
-@media (max-width: 950px) {
-    #game-container {
-        width: 95%;
-    }
-    
-    #cards-container {
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    .card {
-        width: 250px;
-    }
-}
-
-@media (max-width: 600px) {
-    header h1 {
-        font-size: 28px;
-    }
-    
-    #game-area {
-        height: 300px;
-    }
-    
-    .village-icon {
-        font-size: 50px;
-    }
-    
-    .enemy {
-        width: 60px;
-        height: 60px;
-    }
-    
-    .enemy-icon {
-        font-size: 30px;
-    }
-}
-header {
-    text-align: center;
-    padding: 20px;
-    color: white;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-}
-
-header h1 {
-    font-size: 36px;
-    margin-bottom: 10px;
-}
-
-.subtitle {
-    font-size: 18px;
-    opacity: 0.9;
-}
-
-main {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-}
-
-#game-container {
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-    width: 900px;
-    padding: 20px;
-}
-
-/* Zone d'informations */
-#game-info {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-}
-
-.info-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 5px;
-}
-
-.label {
-    font-weight: bold;
-    color: #555;
-    font-size: 14px;
-    margin-bottom: 5px;
-}
-
-#lives {
-    font-size: 24px;
-}
-
-#score {
-    font-size: 20px;
-    font-weight: bold;
-    color: #27ae60;
-}
-
-#message {
-    font-size: 16px;
-    color: white;
-    background: #667eea;
-    padding: 10px 20px;
-    border-radius: 20px;
-    font-weight: bold;
-    text-align: center;
-    transition: all 0.3s;
-}
-
-/* Zone de jeu */
-#game-area {
-    position: relative;
-    height: 400px;
-    background: linear-gradient(to bottom, #87CEEB 0%, #98D98E 100%);
-    border: 3px solid #333;
-    border-radius: 10px;
-    overflow: hidden;
-    margin-bottom: 20px;
-}
-
-/* Village */
-#village {
+.card-cooldown {
     position: absolute;
-    left: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    text-align: center;
-    z-index: 10;
-}
-
-.village-icon {
-    font-size: 80px;
-    animation: pulse 2s infinite;
-}
-
-.village-text {
-    font-weight: bold;
-    color: #333;
-    background: rgba(255,255,255,0.8);
-    padding: 5px 10px;
-    border-radius: 5px;
-    margin-top: 5px;
-}
-
-@keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-}
-
-/* Zone des ennemis */
-#enemies-zone {
-    position: relative;
-    width: 100%;
-    height: 100%;
-}
-
-/* Ennemis */
-.enemy {
-    position: absolute;
-    width: 80px;
-    height: 80px;
-    background: rgba(255,255,255,0.9);
-    border: 3px solid #333;
-    border-radius: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    cursor: crosshair;
-    transition: transform 0.1s, opacity 0.3s;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-}
-
-.enemy:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 15px rgba(0,0,0,0.3);
-}
-
-.enemy.licence {
-    background: linear-gradient(135deg, #ffd93d 0%, #ffb93d 100%);
-}
-
-.enemy.cloud {
-    background: linear-gradient(135deg, #a8e6cf 0%, #3edbf0 100%);
-}
-
-.enemy-icon {
-    font-size: 40px;
-}
-
-.enemy-hp {
-    position: absolute;
-    top: -10px;
-    right: -10px;
+    top: 5px;
+    right: 5px;
     background: #e74c3c;
     color: white;
+    font-size: 10px;
     font-weight: bold;
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    border: 2px solid white;
-}
-
-.enemy.dead {
-    animation: enemyDeath 0.3s forwards;
-}
-
-@keyframes enemyDeath {
-    0% { 
-        opacity: 1;
-        transform: scale(1) rotate(0deg);
-    }
-    100% { 
-        opacity: 0;
-        transform: scale(0.5) rotate(180deg);
-    }
-}
-
-/* Cartes */
-#cards-container {
-    display: flex;
-    justify-content: space-around;
-    gap: 20px;
-}
-
-.card {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border: 3px solid #333;
-    border-radius: 15px;
-    padding: 15px;
-    width: 180px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
-
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-}
-
-.card.selected {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-color: #fff;
-    transform: translateY(-10px) scale(1.05);
-}
-
-.card.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    pointer-events: none;
-}
-
-.card-icon {
-    font-size: 50px;
-    margin-bottom: 10px;
-}
-
-.card-name {
-    font-weight: bold;
-    font-size: 16px;
-    margin-bottom: 5px;
-}
-
-.card-description {
-    font-size: 12px;
-    color: #666;
+    padding: 3px 6px;
+    border-radius: 10px;
 }
 
 .card.selected .card-description {
     color: rgba(255,255,255,0.9);
+}
+
+.card.selected .card-cooldown {
+    background: rgba(255,255,255,0.3);
 }
 
 /* Écran de fin */
@@ -784,12 +404,12 @@ main {
     }
     
     #cards-container {
-        flex-direction: column;
-        align-items: center;
+        flex-wrap: wrap;
+        justify-content: center;
     }
     
     .card {
-        width: 250px;
+        width: 140px;
     }
 }
 
@@ -814,5 +434,4 @@ main {
     .enemy-icon {
         font-size: 30px;
     }
-
 }
