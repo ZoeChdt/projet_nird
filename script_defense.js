@@ -1,3 +1,4 @@
+// Variables du jeu
 let lives = 3;
 let score = 0;
 let enemiesKilled = 0;
@@ -9,12 +10,14 @@ let gameRunning = false;
 let spawnTimer = null;
 let enemies = [];
 
+// Cooldowns des cartes
 let cardCooldowns = {
     'potion': false,
     'reemploi': false,
     'bouclier': false
 };
 
+// Éléments DOM
 const livesDisplay = document.getElementById('lives');
 const scoreDisplay = document.getElementById('score');
 const messageDisplay = document.getElementById('message');
@@ -25,6 +28,7 @@ const resultMessage = document.getElementById('result-message');
 const restartBtn = document.getElementById('restart-btn');
 const cards = document.querySelectorAll('.card');
 
+// Initialisation du jeu
 function initGame() {
     lives = 3;
     score = 0;
@@ -44,21 +48,28 @@ function initGame() {
     gameOverScreen.classList.add('hidden');
     enemiesZone.innerHTML = '';
     
+    // Retirer la sélection des cartes
     cards.forEach(card => card.classList.remove('selected', 'disabled', 'cooldown'));
     
+    // Démarrer le spawn des ennemis
     startSpawning();
 }
+
+// Mettre à jour l'affichage
 function updateDisplay() {
     const hearts = '❤️'.repeat(lives) + '🖤'.repeat(3 - lives);
     livesDisplay.textContent = hearts;
     scoreDisplay.textContent = `${enemiesKilled}/10`;
 }
 
+// Gestion des clics sur les cartes
 cards.forEach(card => {
     card.addEventListener('click', () => {
         if (!gameRunning) return;
         
         const cardType = card.dataset.type;
+        
+        // Vérifier si la carte est en cooldown
         if (cardCooldowns[cardType]) {
             messageDisplay.textContent = "⏳ Cette carte est en rechargement !";
             messageDisplay.style.color = "#e74c3c";
@@ -67,14 +78,20 @@ cards.forEach(card => {
             }, 1000);
             return;
         }
+        
+        // Désélectionner les autres cartes
         cards.forEach(c => c.classList.remove('selected'));
+        
+        // Sélectionner cette carte
         card.classList.add('selected');
         selectedCard = cardType;
+        
         messageDisplay.textContent = "Maintenant, cliquez sur un ennemi !";
         messageDisplay.style.color = "white";
     });
 });
 
+// Créer un ennemi
 function createEnemy() {
     if (!gameRunning) return;
     
@@ -100,11 +117,14 @@ function createEnemy() {
     enemiesZone.appendChild(enemy);
     enemies.push(enemy);
     
+    // Déplacement de l'ennemi
     moveEnemy(enemy);
     
+    // Clic sur l'ennemi
     enemy.addEventListener('click', () => attackEnemy(enemy));
 }
 
+// Déplacer un ennemi
 function moveEnemy(enemy) {
     const moveInterval = setInterval(() => {
         if (!gameRunning || !enemy.parentElement) {
@@ -113,13 +133,14 @@ function moveEnemy(enemy) {
         }
         
         if (isShieldActive) {
-            return;
+            return; // Ne pas bouger pendant le bouclier
         }
         
         let currentRight = parseInt(enemy.style.right) || 0;
         currentRight += enemySpeed;
         enemy.style.right = currentRight + 'px';
         
+        // Si l'ennemi atteint le village
         if (currentRight >= enemiesZone.offsetWidth - 100) {
             clearInterval(moveInterval);
             enemyReachesVillage(enemy);
@@ -127,6 +148,7 @@ function moveEnemy(enemy) {
     }, 30);
 }
 
+// Ennemi atteint le village
 function enemyReachesVillage(enemy) {
     if (!enemy.parentElement) return;
     
@@ -141,6 +163,7 @@ function enemyReachesVillage(enemy) {
     }
 }
 
+// Attaquer un ennemi
 function attackEnemy(enemy) {
     if (!selectedCard || !gameRunning) return;
     
@@ -149,17 +172,21 @@ function attackEnemy(enemy) {
         return;
     }
     
+    // Vérifier si la carte est en cooldown
     if (cardCooldowns[selectedCard]) {
         return;
     }
     
+    // Réduire les HP de l'ennemi
     let currentHp = parseInt(enemy.dataset.hp);
     currentHp--;
     enemy.dataset.hp = currentHp;
     
+    // Mettre à jour l'affichage des HP
     const hpDisplay = enemy.querySelector('.enemy-hp');
     hpDisplay.textContent = currentHp;
     
+    // Effet visuel d'attaque
     enemy.style.transform = 'scale(0.9)';
     setTimeout(() => {
         if (enemy.parentElement) {
@@ -167,6 +194,7 @@ function attackEnemy(enemy) {
         }
     }, 100);
     
+    // Si l'ennemi est mort
     if (currentHp <= 0) {
         enemy.classList.add('dead');
         setTimeout(() => {
@@ -178,17 +206,21 @@ function attackEnemy(enemy) {
         updateDisplay();
         messageDisplay.textContent = `✅ Ennemi éliminé ! (${enemiesKilled}/10)`;
         
+        // Vérifier la victoire
         if (enemiesKilled >= 10) {
             endGame(true);
         }
     }
     
-    activateCooldown(selectedCard, 2000);
+    // Activer le cooldown de la carte (2 seconde pour potion et reemploi)
+    activateCooldown(selectedCard, 1000);
 }
 
+// Activer le bouclier
 function activateShield() {
     if (isShieldActive) return;
     
+    // Vérifier si le bouclier est en cooldown
     if (cardCooldowns['bouclier']) {
         return;
     }
@@ -197,10 +229,12 @@ function activateShield() {
     messageDisplay.textContent = "🛡️ Bouclier activé ! Les ennemis sont bloqués !";
     messageDisplay.style.color = "#3498db";
     
+    // Désélectionner la carte bouclier
     const shieldCard = document.querySelector('[data-type="bouclier"]');
     shieldCard.classList.remove('selected');
     selectedCard = null;
     
+    // Effet visuel sur les ennemis
     enemies.forEach(enemy => {
         enemy.style.filter = 'brightness(0.5)';
     });
@@ -210,6 +244,7 @@ function activateShield() {
         messageDisplay.textContent = "Bouclier désactivé ! Cliquez sur une carte !";
         messageDisplay.style.color = "white";
         
+        // Retirer l'effet visuel
         enemies.forEach(enemy => {
             if (enemy.parentElement) {
                 enemy.style.filter = 'brightness(1)';
@@ -217,15 +252,18 @@ function activateShield() {
         });
     }, 3000);
     
+    // Activer le cooldown du bouclier (3 secondes)
     activateCooldown('bouclier', 3000);
 }
 
+// Fonction pour activer le cooldown d'une carte
 function activateCooldown(cardType, duration) {
     cardCooldowns[cardType] = true;
     
     const card = document.querySelector(`[data-type="${cardType}"]`);
     card.classList.add('cooldown');
     
+    // Créer un overlay de cooldown
     let cooldownOverlay = card.querySelector('.cooldown-overlay');
     if (!cooldownOverlay) {
         cooldownOverlay = document.createElement('div');
@@ -233,8 +271,16 @@ function activateCooldown(cardType, duration) {
         card.appendChild(cooldownOverlay);
     }
     
+    // Animation du cooldown avec transition CSS
     cooldownOverlay.style.display = 'block';
-    cooldownOverlay.style.animation = `cooldownAnim ${duration}ms linear`;
+    cooldownOverlay.style.height = '100%';
+    cooldownOverlay.style.transition = 'none';
+    
+    // Forcer le reflow pour que la transition fonctionne
+    cooldownOverlay.offsetHeight;
+    
+    cooldownOverlay.style.transition = `height ${duration}ms linear`;
+    cooldownOverlay.style.height = '0%';
     
     setTimeout(() => {
         cardCooldowns[cardType] = false;
@@ -245,9 +291,12 @@ function activateCooldown(cardType, duration) {
     }, duration);
 }
 
+// Démarrer le spawn des ennemis
 function startSpawning() {
+    // Premier ennemi immédiat
     createEnemy();
     
+    // Puis spawn régulier
     spawnTimer = setInterval(() => {
         if (gameRunning) {
             createEnemy();
@@ -255,10 +304,12 @@ function startSpawning() {
     }, enemySpawnInterval);
 }
 
+// Fin du jeu
 function endGame(victory) {
     gameRunning = false;
     clearInterval(spawnTimer);
     
+    // Retirer tous les ennemis
     enemies.forEach(enemy => {
         if (enemy.parentElement) {
             enemy.remove();
@@ -266,6 +317,7 @@ function endGame(victory) {
     });
     enemies = [];
     
+    // Afficher l'écran de fin
     gameOverScreen.classList.remove('hidden');
     
     if (victory) {
@@ -281,10 +333,12 @@ function endGame(victory) {
     }
 }
 
+// Bouton rejouer
 restartBtn.addEventListener('click', () => {
     initGame();
 });
 
+// Démarrer le jeu au chargement
 window.addEventListener('load', () => {
     initGame();
 });
