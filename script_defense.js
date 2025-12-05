@@ -9,6 +9,12 @@ let gameRunning = false;
 let spawnTimer = null;
 let enemies = [];
 
+let cardCooldowns = {
+    'potion': false,
+    'reemploi': false,
+    'bouclier': false
+};
+
 const livesDisplay = document.getElementById('lives');
 const scoreDisplay = document.getElementById('score');
 const messageDisplay = document.getElementById('message');
@@ -27,17 +33,21 @@ function initGame() {
     isShieldActive = false;
     gameRunning = true;
     enemies = [];
+    cardCooldowns = {
+        'potion': false,
+        'reemploi': false,
+        'bouclier': false
+    };
     
     updateDisplay();
     messageDisplay.textContent = "Cliquez sur une carte, puis sur un ennemi !";
     gameOverScreen.classList.add('hidden');
     enemiesZone.innerHTML = '';
     
-    cards.forEach(card => card.classList.remove('selected', 'disabled'));
+    cards.forEach(card => card.classList.remove('selected', 'disabled', 'cooldown'));
     
     startSpawning();
 }
-
 function updateDisplay() {
     const hearts = '❤️'.repeat(lives) + '🖤'.repeat(3 - lives);
     livesDisplay.textContent = hearts;
@@ -47,11 +57,21 @@ function updateDisplay() {
 cards.forEach(card => {
     card.addEventListener('click', () => {
         if (!gameRunning) return;
+        
+        const cardType = card.dataset.type;
+        if (cardCooldowns[cardType]) {
+            messageDisplay.textContent = "⏳ Cette carte est en rechargement !";
+            messageDisplay.style.color = "#e74c3c";
+            setTimeout(() => {
+                messageDisplay.style.color = "white";
+            }, 1000);
+            return;
+        }
         cards.forEach(c => c.classList.remove('selected'));
         card.classList.add('selected');
-        selectedCard = card.dataset.type;
-        
+        selectedCard = cardType;
         messageDisplay.textContent = "Maintenant, cliquez sur un ennemi !";
+        messageDisplay.style.color = "white";
     });
 });
 
@@ -79,7 +99,9 @@ function createEnemy() {
     
     enemiesZone.appendChild(enemy);
     enemies.push(enemy);
+    
     moveEnemy(enemy);
+    
     enemy.addEventListener('click', () => attackEnemy(enemy));
 }
 
@@ -93,6 +115,7 @@ function moveEnemy(enemy) {
         if (isShieldActive) {
             return;
         }
+        
         let currentRight = parseInt(enemy.style.right) || 0;
         currentRight += enemySpeed;
         enemy.style.right = currentRight + 'px';
@@ -126,6 +149,10 @@ function attackEnemy(enemy) {
         return;
     }
     
+    if (cardCooldowns[selectedCard]) {
+        return;
+    }
+    
     let currentHp = parseInt(enemy.dataset.hp);
     currentHp--;
     enemy.dataset.hp = currentHp;
@@ -155,17 +182,22 @@ function attackEnemy(enemy) {
             endGame(true);
         }
     }
+    
+    activateCooldown(selectedCard, 2000);
 }
 
 function activateShield() {
     if (isShieldActive) return;
+    
+    if (cardCooldowns['bouclier']) {
+        return;
+    }
     
     isShieldActive = true;
     messageDisplay.textContent = "🛡️ Bouclier activé ! Les ennemis sont bloqués !";
     messageDisplay.style.color = "#3498db";
     
     const shieldCard = document.querySelector('[data-type="bouclier"]');
-    shieldCard.classList.add('disabled');
     shieldCard.classList.remove('selected');
     selectedCard = null;
     
@@ -177,7 +209,6 @@ function activateShield() {
         isShieldActive = false;
         messageDisplay.textContent = "Bouclier désactivé ! Cliquez sur une carte !";
         messageDisplay.style.color = "white";
-        shieldCard.classList.remove('disabled');
         
         enemies.forEach(enemy => {
             if (enemy.parentElement) {
@@ -185,6 +216,33 @@ function activateShield() {
             }
         });
     }, 3000);
+    
+    activateCooldown('bouclier', 3000);
+}
+
+function activateCooldown(cardType, duration) {
+    cardCooldowns[cardType] = true;
+    
+    const card = document.querySelector(`[data-type="${cardType}"]`);
+    card.classList.add('cooldown');
+    
+    let cooldownOverlay = card.querySelector('.cooldown-overlay');
+    if (!cooldownOverlay) {
+        cooldownOverlay = document.createElement('div');
+        cooldownOverlay.classList.add('cooldown-overlay');
+        card.appendChild(cooldownOverlay);
+    }
+    
+    cooldownOverlay.style.display = 'block';
+    cooldownOverlay.style.animation = `cooldownAnim ${duration}ms linear`;
+    
+    setTimeout(() => {
+        cardCooldowns[cardType] = false;
+        card.classList.remove('cooldown');
+        if (cooldownOverlay) {
+            cooldownOverlay.style.display = 'none';
+        }
+    }, duration);
 }
 
 function startSpawning() {
