@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Choix Durable au Village NIRD</title>
+	<link rel="stylesheet" type="text/css" href="stylesChoix.css">
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>🌿 Choix Écologique</h1>
+
+        <div id="points">Points : 0</div>
+
+        <!-- Bouton retour -->
+        <div class="btn-return">
+            <button id="btnRetour">⬅️ Retour au menu</button>
+        </div>
+
+        <!-- Boutons choix -->
+        <div class="btn-row">
+            <button id="btnDecheterie">
+                🗑️ Poubelle
+            </button>
+
+            <button id="btnRecyclage">
+                ♻️ Recyclage
+            </button>
+        </div>
+
+        <!-- Texte d'information -->
+        <div id="message"></div>
+
+        <!-- Scène graphique -->
+        <div class="scene" id="scene"></div>
+    </div>
+
+    <script>
+        let points = 0;
+
+        const msg = document.getElementById("message");
+        const scene = document.getElementById("scene");
+        const pointsDisplay = document.getElementById("points");
+
+        function updatePoints() {
+            pointsDisplay.textContent = "Points : " + points;
+        }
+
+        // --- Recyclage ---
+        document.getElementById("btnRecyclage").addEventListener("click", () => {
+            scene.style.backgroundImage = "url('Centre-Recyclage.png')";
+            scene.style.backgroundPosition = "center 70%";
+            msg.style.display = "block";
+
+            points += 10;
+            updatePoints();
+
+            msg.innerHTML = `
+                ✅ <strong>Bravo ! Le recyclage est la meilleure solution.</strong><br><br>
+                🌱 Les matériaux seront réutilisés, ce qui réduit la pollution et économise des ressources.<br><br>
+                ➕ <strong>+10 points</strong>
+            `;
+        });
+
+        // --- Déchèterie ---
+        document.getElementById("btnDecheterie").addEventListener("click", () => {
+            scene.style.backgroundImage = "url('Dechetrie.png')";
+            scene.style.backgroundPosition = "center 70%";
+            msg.style.display = "block";
+
+            points -= 5;
+            updatePoints();
+
+            msg.innerHTML = `
+                ❌ <strong>Tu as jeté l’objet à la poubelle…</strong><br><br>
+                🔥 Cela génère des déchets supplémentaires et de la pollution.<br><br>
+                ➖ <strong>-5 points</strong>
+            `;
+        });
+
+        // --- Retour au menu ---
+        document.getElementById("btnRetour").addEventListener("click", () => {
+            scene.style.backgroundImage = "url('forêt.png')";
+            scene.style.backgroundPosition = "center 70%";
+
+            msg.style.display = "none";
+        });
+    </script>
+
+</body>
+</html>
