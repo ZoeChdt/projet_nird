@@ -14,6 +14,7 @@
 
     <main>
         <div id="game-container">
+            <!-- Zone d'informations -->
             <div id="game-info">
                 <div class="info-item">
                     <span class="label">Vies du village :</span>
@@ -28,14 +29,21 @@
                 </div>
             </div>
 
+            <!-- Zone de jeu -->
             <div id="game-area">
+                <!-- Village à gauche -->
                 <div id="village">
                     <div class="village-icon">🏘️</div>
                     <div class="village-text">Village NIRD</div>
                 </div>
+
+                <!-- Zone où apparaissent les ennemis -->
                 <div id="enemies-zone">
+                    <!-- Les ennemis seront ajoutés ici par JavaScript -->
                 </div>
             </div>
+
+            <!-- Cartes du joueur -->
             <div id="cards-container">
                 <div class="card" id="card1" data-type="potion">
                     <div class="card-icon">💧</div>
@@ -55,7 +63,9 @@
                     <div class="card-description">Bloque 3 secondes</div>
                 </div>
             </div>
-        </div
+        </div>
+
+        <!-- Écran de fin de partie -->
         <div id="game-over" class="hidden">
             <div id="game-over-content">
                 <h2 id="result-title"></h2>
@@ -65,7 +75,7 @@
             </div>
         </div>
     </main>
+
     <script src="script_defense.js"></script>
 </body>
-
 </html>
